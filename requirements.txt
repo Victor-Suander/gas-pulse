@@ -1,0 +1,4 @@
+Flask
+pandas
+requests
+beautifulsoup4
