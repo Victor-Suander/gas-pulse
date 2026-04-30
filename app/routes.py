@@ -1,8 +1,10 @@
 from flask import Blueprint, render_template, request
+import pandas as pd
 from app.utils.arquivos import extensao_permitida, salvar_arquivos_upload
 from app.services.preco_service import buscar_precos_referencia
 from app.services.vendas_service import consolidar_vendas
 from app.services.email_service import processar_emails
+from app.services.relatorio_service import gerar_ranking_faturamento, gerar_corpo_email
 
 main = Blueprint("main", __name__)
 
@@ -52,6 +54,7 @@ def index():
                 precos = buscar_precos_referencia()
                 df_vendas, caminho_arquivo_vendas = consolidar_vendas(VENDAS_DIR, precos)
                 resumos_emails, caminho_arquivo_emails = processar_emails(EMAILS_DIR)
+                ranking_df, caminho_arquivo_ranking = gerar_ranking_faturamento(df_vendas)
 
                 # Gerar resumo simples de vendas
                 faturamento_por_produto = df_vendas.groupby("produto_canonico")["valor_total_brl"].sum().to_dict()
@@ -61,18 +64,31 @@ def index():
                 alertas_emails = []
                 for resumo in resumos_emails:
                     if resumo["alertas"]:
-                        alertas_emails.extend(resumo["alertas"].split("; "))
+                        alertas_emails.extend([alerta.strip() for alerta in resumo["alertas"].split("; ") if alerta.strip()])
+
+                resumo_emails_df = pd.DataFrame(resumos_emails)
+                corpo_email = gerar_corpo_email(
+                    df_vendas,
+                    resumo_emails_df,
+                    {
+                        "vendas": caminho_arquivo_vendas,
+                        "emails": caminho_arquivo_emails,
+                        "ranking": caminho_arquivo_ranking
+                    }
+                )
 
                 resumo_vendas = {
                     "total_registros": len(df_vendas),
                     "caminho_arquivo_vendas": caminho_arquivo_vendas,
                     "caminho_arquivo_emails": caminho_arquivo_emails,
+                    "caminho_arquivo_ranking": caminho_arquivo_ranking,
                     "faturamento_por_produto": faturamento_por_produto,
                     "faturamento_por_filial": faturamento_por_filial,
-                    "alertas_emails": alertas_emails
+                    "alertas_emails": alertas_emails,
+                    "corpo_email": corpo_email
                 }
 
-                message = f"Vendas consolidadas com {len(df_vendas)} registros. E-mails processados: {len(resumos_emails)}. Arquivos gerados: {caminho_arquivo_vendas}, {caminho_arquivo_emails}"
+                message = f"Vendas consolidadas com {len(df_vendas)} registros. E-mails processados: {len(resumos_emails)}. Arquivos gerados: {caminho_arquivo_vendas}, {caminho_arquivo_emails}, {caminho_arquivo_ranking}"
                 status = "success"
             except Exception as e:
                 message = f"Arquivos salvos, mas erro ao processar: {str(e)}"

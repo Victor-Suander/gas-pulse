@@ -93,7 +93,7 @@ body {
     color: #991b1b;
 }
 
-.result-panel {
+..result-panel {
     margin-top: 1.5rem;
 }
 
@@ -113,4 +113,14 @@ body {
 .result-box p {
     margin: 0;
     line-height: 1.75;
+}
+
+.email-body {
+    white-space: pre-wrap;
+    font-family: Consolas, monospace;
+    background: #eef2ff;
+    padding: 1rem;
+    border-radius: 0.85rem;
+    overflow-x: auto;
+    margin: 0;
 }

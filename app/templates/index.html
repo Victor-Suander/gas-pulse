@@ -74,7 +74,11 @@
         <section class="result-panel">
             <h2>Corpo de e-mail gerado</h2>
             <div class="result-box">
+                {% if resumo_vendas and resumo_vendas.corpo_email %}
+                <pre class="email-body">{{ resumo_vendas.corpo_email }}</pre>
+                {% else %}
                 <p>O corpo do e-mail será gerado nesta área na próxima etapa.</p>
+                {% endif %}
             </div>
         </section>
     </main>
