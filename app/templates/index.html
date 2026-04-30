@@ -39,8 +39,9 @@
             <h2>Relatório consolidado</h2>
             <div class="result-box">
                 {% if resumo_vendas %}
-                <p><strong>Total de registros:</strong> {{ resumo_vendas.total_registros }}</p>
-                <p><strong>Arquivo gerado:</strong> {{ resumo_vendas.caminho_arquivo }}</p>
+                <p><strong>Total de registros de vendas:</strong> {{ resumo_vendas.total_registros }}</p>
+                <p><strong>Arquivo de vendas:</strong> {{ resumo_vendas.caminho_arquivo_vendas }}</p>
+                <p><strong>Arquivo de emails:</strong> {{ resumo_vendas.caminho_arquivo_emails }}</p>
 
                 <h3>Faturamento por produto</h3>
                 <ul>
@@ -55,6 +56,15 @@
                     <li>{{ filial }}: R$ {{ "%.2f"|format(valor) }}</li>
                 {% endfor %}
                 </ul>
+
+                {% if resumo_vendas.alertas_emails %}
+                <h3>Alertas dos gerentes</h3>
+                <ul>
+                {% for alerta in resumo_vendas.alertas_emails %}
+                    <li>{{ alerta }}</li>
+                {% endfor %}
+                </ul>
+                {% endif %}
                 {% else %}
                 <p>Os resultados serão exibidos aqui após a implementação do processamento de dados.</p>
                 {% endif %}

@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request
 from app.utils.arquivos import extensao_permitida, salvar_arquivos_upload
 from app.services.preco_service import buscar_precos_referencia
 from app.services.vendas_service import consolidar_vendas
+from app.services.email_service import processar_emails
 
 main = Blueprint("main", __name__)
 
@@ -49,23 +50,32 @@ def index():
         else:
             try:
                 precos = buscar_precos_referencia()
-                df_vendas, caminho_arquivo = consolidar_vendas(VENDAS_DIR, precos)
+                df_vendas, caminho_arquivo_vendas = consolidar_vendas(VENDAS_DIR, precos)
+                resumos_emails, caminho_arquivo_emails = processar_emails(EMAILS_DIR)
 
-                # Gerar resumo simples
+                # Gerar resumo simples de vendas
                 faturamento_por_produto = df_vendas.groupby("produto_canonico")["valor_total_brl"].sum().to_dict()
                 faturamento_por_filial = df_vendas.groupby("filial_nome")["valor_total_brl"].sum().to_dict()
 
+                # Coletar alertas dos emails
+                alertas_emails = []
+                for resumo in resumos_emails:
+                    if resumo["alertas"]:
+                        alertas_emails.extend(resumo["alertas"].split("; "))
+
                 resumo_vendas = {
                     "total_registros": len(df_vendas),
-                    "caminho_arquivo": caminho_arquivo,
+                    "caminho_arquivo_vendas": caminho_arquivo_vendas,
+                    "caminho_arquivo_emails": caminho_arquivo_emails,
                     "faturamento_por_produto": faturamento_por_produto,
-                    "faturamento_por_filial": faturamento_por_filial
+                    "faturamento_por_filial": faturamento_por_filial,
+                    "alertas_emails": alertas_emails
                 }
 
-                message = f"Arquivos salvos com sucesso. Vendas consolidadas com {len(df_vendas)} registros. Arquivo gerado: {caminho_arquivo}"
+                message = f"Vendas consolidadas com {len(df_vendas)} registros. E-mails processados: {len(resumos_emails)}. Arquivos gerados: {caminho_arquivo_vendas}, {caminho_arquivo_emails}"
                 status = "success"
             except Exception as e:
-                message = f"Arquivos salvos, mas erro ao processar vendas: {str(e)}"
+                message = f"Arquivos salvos, mas erro ao processar: {str(e)}"
                 status = "error"
 
     return render_template("index.html", message=message, status=status, resumo_vendas=resumo_vendas)
