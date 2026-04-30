@@ -97,6 +97,14 @@
                         {% else %}
                         <p>O corpo do e-mail será gerado nesta área na próxima etapa.</p>
                         {% endif %}
+
+                        {% if resumo_vendas and resumo_vendas.caminho_arquivo_ranking %}
+                        <div class="pdf-action">
+                            <button type="button" class="secondary-button" onclick="gerarPDF()">Gerar PDF do relatório</button>
+                        </div>
+                        {% endif %}
+
+                        <div id="pdf-message" style="display: none;" class="alert"></div>
                     </div>
                 </div>
             </div>
@@ -115,6 +123,37 @@
                     li.textContent = file.name;
                     list.appendChild(li);
                 });
+            }
+        }
+
+        async function gerarPDF() {
+            const button = event.target;
+            const msgDiv = document.getElementById('pdf-message');
+            button.disabled = true;
+            button.textContent = 'Gerando PDF...';
+            msgDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/gerar-pdf', { method: 'POST' });
+                const data = await response.json();
+
+                msgDiv.style.display = 'block';
+                if (response.ok) {
+                    msgDiv.className = 'alert success';
+                    msgDiv.textContent = `✓ ${data.message}`;
+                    button.textContent = 'PDF gerado com sucesso!';
+                } else {
+                    msgDiv.className = 'alert error';
+                    msgDiv.textContent = `✗ ${data.message}`;
+                    button.disabled = false;
+                    button.textContent = 'Gerar PDF do relatório';
+                }
+            } catch (error) {
+                msgDiv.style.display = 'block';
+                msgDiv.className = 'alert error';
+                msgDiv.textContent = `✗ Erro ao conectar com o servidor: ${error.message}`;
+                button.disabled = false;
+                button.textContent = 'Gerar PDF do relatório';
             }
         }
     </script>
