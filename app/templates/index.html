@@ -7,10 +7,47 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <main>
-        <h1>Gas Pulse</h1>
-        <p>Aplicação web para processar vendas de postos de combustível, emails de gerentes, preços de referência e gerar relatórios consolidados.</p>
-        <p>Esta versão inicial contém a estrutura básica do projeto em Flask.</p>
+    <main class="page-card">
+        <section class="hero">
+            <h1>Gas Pulse</h1>
+            <p class="subtitle">Interface inicial para upload de dados de vendas, emails de gerentes e preparação para geração de relatórios.</p>
+        </section>
+
+        {% if message %}
+        <div class="alert {{ status }}">
+            {{ message }}
+        </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="upload-form">
+            <div class="field-group">
+                <label for="sales_files">Arquivos CSV de vendas</label>
+                <input type="file" id="sales_files" name="sales_files" accept=".csv" multiple>
+                <span class="field-help">Envie um ou mais arquivos CSV com dados de vendas.</span>
+            </div>
+
+            <div class="field-group">
+                <label for="email_files">Arquivos TXT de emails</label>
+                <input type="file" id="email_files" name="email_files" accept=".txt" multiple>
+                <span class="field-help">Envie um ou mais arquivos TXT com emails dos gerentes.</span>
+            </div>
+
+            <button type="submit" class="primary-button">Processar arquivos</button>
+        </form>
+
+        <section class="result-panel">
+            <h2>Relatório consolidado</h2>
+            <div class="result-box">
+                <p>Os resultados serão exibidos aqui após a implementação do processamento de dados.</p>
+            </div>
+        </section>
+
+        <section class="result-panel">
+            <h2>Corpo de e-mail gerado</h2>
+            <div class="result-box">
+                <p>O corpo do e-mail será gerado nesta área na próxima etapa.</p>
+            </div>
+        </section>
     </main>
 </body>
 </html>
