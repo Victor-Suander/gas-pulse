@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request
 from app.utils.arquivos import extensao_permitida, salvar_arquivos_upload
+from app.services.preco_service import buscar_precos_referencia
 
 main = Blueprint("main", __name__)
 
@@ -44,7 +45,13 @@ def index():
             message = "Alguns arquivos não foram salvos devido a extensões inválidas."
             status = "error"
         else:
-            message = f"Sucesso! {total_vendas} arquivos CSV de vendas e {total_emails} arquivos TXT de emails salvos."
-            status = "success"
+            try:
+                precos = buscar_precos_referencia()
+                precos_str = ", ".join(f"{produto}: {preco:.2f}" for produto, preco in precos.items())
+                message = f"Arquivos salvos com sucesso. Preços de referência coletados: {precos_str}"
+                status = "success"
+            except Exception as e:
+                message = f"Arquivos salvos, mas erro ao coletar preços: {str(e)}"
+                status = "error"
 
     return render_template("index.html", message=message, status=status)
