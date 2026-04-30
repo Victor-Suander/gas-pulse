@@ -3,84 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gas Pulse</title>
+    <title>Radar dos Postos</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <main class="page-card">
-        <section class="hero">
-            <h1>Gas Pulse</h1>
-            <p class="subtitle">Interface inicial para upload de dados de vendas, emails de gerentes e preparação para geração de relatórios.</p>
-        </section>
+    <header class="header">
+        <h1>Radar dos Postos</h1>
+        <p class="subtitle">Transforme arquivos de vendas e relatos dos gerentes em relatórios prontos para decisão.</p>
+    </header>
 
+    <main class="main-content">
         {% if message %}
         <div class="alert {{ status }}">
             {{ message }}
+            {% if status == 'success' %}
+            <a href="/" class="retry-link">Processar novamente</a>
+            {% endif %}
         </div>
         {% endif %}
 
-        <form method="post" enctype="multipart/form-data" class="upload-form">
-            <div class="field-group">
-                <label for="vendas_files">Arquivos CSV de vendas</label>
-                <input type="file" id="vendas_files" name="vendas_files" accept=".csv" multiple>
-                <span class="field-help">Envie um ou mais arquivos CSV com dados de vendas.</span>
-            </div>
+        <section class="upload-section">
+            <h2>Arquivos do processamento</h2>
+            <form method="post" enctype="multipart/form-data" class="upload-form">
+                <div class="upload-grid">
+                    <div class="upload-column">
+                        <div class="field-group">
+                            <label for="vendas_files">CSVs de vendas</label>
+                            <input type="file" id="vendas_files" name="vendas_files" accept=".csv" multiple onchange="showSelectedFiles('vendas_files', 'vendas-list')">
+                            <span class="field-help">Envie um ou mais arquivos CSV com dados de vendas.</span>
+                            <ul id="vendas-list" class="file-list"></ul>
+                        </div>
+                    </div>
 
-            <div class="field-group">
-                <label for="emails_files">Arquivos TXT de emails</label>
-                <input type="file" id="emails_files" name="emails_files" accept=".txt" multiple>
-                <span class="field-help">Envie um ou mais arquivos TXT com emails dos gerentes.</span>
-            </div>
+                    <div class="upload-column">
+                        <div class="field-group">
+                            <label for="emails_files">E-mails dos gerentes</label>
+                            <input type="file" id="emails_files" name="emails_files" accept=".txt" multiple onchange="showSelectedFiles('emails_files', 'emails-list')">
+                            <span class="field-help">Envie um ou mais arquivos TXT com emails dos gerentes.</span>
+                            <ul id="emails-list" class="file-list"></ul>
+                        </div>
+                    </div>
+                </div>
 
-            <button type="submit" class="primary-button">Processar arquivos</button>
-        </form>
-
-        <section class="result-panel">
-            <h2>Relatório consolidado</h2>
-            <div class="result-box">
-                {% if resumo_vendas %}
-                <p><strong>Total de registros de vendas:</strong> {{ resumo_vendas.total_registros }}</p>
-                <p><strong>Arquivo de vendas:</strong> {{ resumo_vendas.caminho_arquivo_vendas }}</p>
-                <p><strong>Arquivo de emails:</strong> {{ resumo_vendas.caminho_arquivo_emails }}</p>
-
-                <h3>Faturamento por produto</h3>
-                <ul>
-                {% for produto, valor in resumo_vendas.faturamento_por_produto.items() %}
-                    <li>{{ produto }}: R$ {{ "%.2f"|format(valor) }}</li>
-                {% endfor %}
-                </ul>
-
-                <h3>Faturamento por filial</h3>
-                <ul>
-                {% for filial, valor in resumo_vendas.faturamento_por_filial.items() %}
-                    <li>{{ filial }}: R$ {{ "%.2f"|format(valor) }}</li>
-                {% endfor %}
-                </ul>
-
-                {% if resumo_vendas.alertas_emails %}
-                <h3>Alertas dos gerentes</h3>
-                <ul>
-                {% for alerta in resumo_vendas.alertas_emails %}
-                    <li>{{ alerta }}</li>
-                {% endfor %}
-                </ul>
-                {% endif %}
-                {% else %}
-                <p>Os resultados serão exibidos aqui após a implementação do processamento de dados.</p>
-                {% endif %}
-            </div>
+                <div class="button-container">
+                    <button type="submit" class="primary-button">Processar arquivos</button>
+                </div>
+            </form>
         </section>
 
-        <section class="result-panel">
-            <h2>Corpo de e-mail gerado</h2>
-            <div class="result-box">
-                {% if resumo_vendas and resumo_vendas.corpo_email %}
-                <pre class="email-body">{{ resumo_vendas.corpo_email }}</pre>
-                {% else %}
-                <p>O corpo do e-mail será gerado nesta área na próxima etapa.</p>
-                {% endif %}
+        <section class="results-section">
+            <div class="results-grid">
+                <div class="result-panel">
+                    <h2>Relatório consolidado</h2>
+                    <div class="result-box">
+                        {% if resumo_vendas %}
+                        <p><strong>Total de registros de vendas:</strong> {{ resumo_vendas.total_registros }}</p>
+                        <p><strong>Arquivo de vendas:</strong> {{ resumo_vendas.caminho_arquivo_vendas }}</p>
+                        <p><strong>Arquivo de emails:</strong> {{ resumo_vendas.caminho_arquivo_emails }}</p>
+
+                        <h3>Faturamento por produto</h3>
+                        <ul>
+                        {% for produto, valor in resumo_vendas.faturamento_por_produto.items() %}
+                            <li>{{ produto }}: R$ {{ "%.2f"|format(valor) }}</li>
+                        {% endfor %}
+                        </ul>
+
+                        <h3>Faturamento por filial</h3>
+                        <ul>
+                        {% for filial, valor in resumo_vendas.faturamento_por_filial.items() %}
+                            <li>{{ filial }}: R$ {{ "%.2f"|format(valor) }}</li>
+                        {% endfor %}
+                        </ul>
+
+                        {% if resumo_vendas.alertas_emails %}
+                        <h3>Alertas dos gerentes</h3>
+                        <ul>
+                        {% for alerta in resumo_vendas.alertas_emails %}
+                            <li>{{ alerta }}</li>
+                        {% endfor %}
+                        </ul>
+                        {% endif %}
+                        {% else %}
+                        <p>Os resultados serão exibidos aqui após a implementação do processamento de dados.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="result-panel">
+                    <h2>Corpo de e-mail gerado</h2>
+                    <div class="result-box">
+                        {% if resumo_vendas and resumo_vendas.corpo_email %}
+                        <pre class="email-body">{{ resumo_vendas.corpo_email }}</pre>
+                        {% else %}
+                        <p>O corpo do e-mail será gerado nesta área na próxima etapa.</p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </section>
     </main>
+
+    <script>
+        function showSelectedFiles(inputId, listId) {
+            const input = document.getElementById(inputId);
+            const list = document.getElementById(listId);
+            list.innerHTML = '';
+
+            if (input.files.length > 0) {
+                Array.from(input.files).forEach(file => {
+                    const li = document.createElement('li');
+                    li.textContent = file.name;
+                    list.appendChild(li);
+                });
+            }
+        }
+    </script>
 </body>
 </html>
