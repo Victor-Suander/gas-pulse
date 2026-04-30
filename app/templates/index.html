@@ -38,7 +38,26 @@
         <section class="result-panel">
             <h2>Relatório consolidado</h2>
             <div class="result-box">
+                {% if resumo_vendas %}
+                <p><strong>Total de registros:</strong> {{ resumo_vendas.total_registros }}</p>
+                <p><strong>Arquivo gerado:</strong> {{ resumo_vendas.caminho_arquivo }}</p>
+
+                <h3>Faturamento por produto</h3>
+                <ul>
+                {% for produto, valor in resumo_vendas.faturamento_por_produto.items() %}
+                    <li>{{ produto }}: R$ {{ "%.2f"|format(valor) }}</li>
+                {% endfor %}
+                </ul>
+
+                <h3>Faturamento por filial</h3>
+                <ul>
+                {% for filial, valor in resumo_vendas.faturamento_por_filial.items() %}
+                    <li>{{ filial }}: R$ {{ "%.2f"|format(valor) }}</li>
+                {% endfor %}
+                </ul>
+                {% else %}
                 <p>Os resultados serão exibidos aqui após a implementação do processamento de dados.</p>
+                {% endif %}
             </div>
         </section>
 

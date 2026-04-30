@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request
 from app.utils.arquivos import extensao_permitida, salvar_arquivos_upload
 from app.services.preco_service import buscar_precos_referencia
+from app.services.vendas_service import consolidar_vendas
 
 main = Blueprint("main", __name__)
 
@@ -18,6 +19,7 @@ def index():
     """
     message = None
     status = None
+    resumo_vendas = None
 
     if request.method == "POST":
         vendas_files = request.files.getlist("vendas_files")
@@ -47,11 +49,24 @@ def index():
         else:
             try:
                 precos = buscar_precos_referencia()
-                precos_str = ", ".join(f"{produto}: {preco:.2f}" for produto, preco in precos.items())
-                message = f"Arquivos salvos com sucesso. Preços de referência coletados: {precos_str}"
+                df_vendas, caminho_arquivo = consolidar_vendas(VENDAS_DIR, precos)
+
+                # Gerar resumo simples
+                faturamento_por_produto = df_vendas.groupby("produto_canonico")["valor_total_brl"].sum().to_dict()
+                faturamento_por_filial = df_vendas.groupby("filial_nome")["valor_total_brl"].sum().to_dict()
+
+                resumo_vendas = {
+                    "total_registros": len(df_vendas),
+                    "caminho_arquivo": caminho_arquivo,
+                    "faturamento_por_produto": faturamento_por_produto,
+                    "faturamento_por_filial": faturamento_por_filial
+                }
+
+                message = f"Arquivos salvos com sucesso. Vendas consolidadas com {len(df_vendas)} registros. Arquivo gerado: {caminho_arquivo}"
                 status = "success"
             except Exception as e:
-                message = f"Arquivos salvos, mas erro ao coletar preços: {str(e)}"
+                message = f"Arquivos salvos, mas erro ao processar vendas: {str(e)}"
                 status = "error"
 
-    return render_template("index.html", message=message, status=status)
+    return render_template("index.html", message=message, status=status, resumo_vendas=resumo_vendas)
+
