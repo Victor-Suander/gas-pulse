@@ -16,9 +16,6 @@
         {% if message %}
         <div class="alert {{ status }}">
             {{ message }}
-            {% if status == 'success' %}
-            <a href="/" class="retry-link">Processar novamente</a>
-            {% endif %}
         </div>
         {% endif %}
 
@@ -46,7 +43,11 @@
                 </div>
 
                 <div class="button-container">
+                    {% if not resumo_vendas %}
                     <button type="submit" class="primary-button">Processar arquivos</button>
+                    {% else %}
+                    <button type="button" class="secondary-outline-button" onclick="processarNovamente()">Processar novamente</button>
+                    {% endif %}
                 </div>
             </form>
         </section>
@@ -155,6 +156,10 @@
                 button.disabled = false;
                 button.textContent = 'Gerar PDF do relatório';
             }
+        }
+
+        function processarNovamente() {
+            window.location.href = '/';
         }
     </script>
 </body>

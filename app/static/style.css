@@ -195,9 +195,20 @@ body {
     cursor: not-allowed;
 }
 
-.pdf-action {
-    margin-top: 1.5rem;
-    text-align: center;
+.secondary-outline-button {
+    padding: 0.95rem 1.8rem;
+    background: transparent;
+    color: #6b7280;
+    font-weight: 700;
+    border: 2px solid #6b7280;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.secondary-outline-button:hover {
+    background: #6b7280;
+    color: #ffffff;
 }
 
 .results-section {
@@ -289,5 +300,10 @@ body {
     .primary-button {
         width: 100%;
         padding: 1rem;
+    }
+
+    .secondary-outline-button {
+        width: 100%;
+        padding: 1rem 1.5rem;
     }
 }
