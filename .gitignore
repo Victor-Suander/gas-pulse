@@ -1,0 +1,23 @@
+# Ambiente virtual
+.venv/
+venv/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Configurações locais
+.env
+
+# Saídas geradas pela aplicação
+output/
+
+# Arquivos temporários
+*.log
+.DS_Store
+Thumbs.db
+
+# Configurações do VS Code
+.vscode/
