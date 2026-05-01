@@ -225,6 +225,28 @@ Ela é diferente de:
 - `alertas`
 - `sentimento_geral`
 
+## Interface da aplicação
+
+Tela inicial para envio dos arquivos CSV de vendas e TXT dos gerentes.
+
+![Tela inicial do FuelSync](docs/images/tela-inicial.png)
+
+Processamento concluído com CSVs gerados e cópia local salva em Documents/FuelSync.
+
+![Processamento concluído](docs/images/processamento-concluido.png)
+
+Relatório consolidado com faturamento, rankings, volume estimado e alertas por filial.
+
+![Relatório consolidado](docs/images/relatorio-consolidado.png)
+
+Corpo de e-mail gerado automaticamente para apoio ao envio para a sede.
+
+![Corpo de e-mail gerado](docs/images/email-gerado.png)
+
+Visão geral da aplicação após o processamento completo dos arquivos.
+
+![Visão geral processada](docs/images/visao-geral-processada.png)
+
 ## Estrutura do projeto
 
 - `app/` - aplicação Flask.
