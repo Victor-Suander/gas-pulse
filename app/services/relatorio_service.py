@@ -97,7 +97,7 @@ def gerar_pdf_relatorio(vendas_df, resumo_emails_df, ranking_df, caminho_saida):
     )
 
     elements = []
-    elements.append(Paragraph("Radar dos Postos", title_style))
+    elements.append(Paragraph("FuelSync", title_style))
     elements.append(Paragraph("Relatório Consolidado - Março/2025", subtitle_style))
     elements.append(Paragraph(f"Data de geração: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}", normal_style))
     elements.append(Spacer(1, 12))

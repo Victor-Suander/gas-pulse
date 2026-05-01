@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 
 
 PRODUTOS_OBRIGATORIOS = ["Gasolina Comum", "Etanol", "Diesel S10"]
-CACHE_PRECOS_PATH = Path("output") / "precos_referencia_marco2025.json"
+CACHE_PRECOS_PATH = Path("app") / "cache" / "precos_referencia_marco2025.json"
 PRECOS_REFERENCIA_FALLBACK = {
     "Gasolina Comum": 6.29,
     "Etanol": 4.11,
@@ -61,6 +61,9 @@ def extrair_precos_html(conteudo_html):
 def salvar_cache_precos(precos, caminho_cache=CACHE_PRECOS_PATH):
     """Salva os últimos preços válidos coletados via web."""
     caminho_cache.parent.mkdir(parents=True, exist_ok=True)
+    if caminho_cache.exists():
+        caminho_cache.unlink()
+
     payload = {
         "data_hora_atualizacao": datetime.now().replace(microsecond=0).isoformat(),
         "precos": precos,

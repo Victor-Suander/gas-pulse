@@ -1,5 +1,7 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, current_app, render_template, request
+from datetime import datetime
 from pathlib import Path
+import shutil
 import pandas as pd
 from app.utils.arquivos import extensao_permitida, salvar_arquivos_upload
 from app.services.preco_service import buscar_precos_referencia
@@ -13,6 +15,23 @@ VENDAS_DIR = "vendas"
 EMAILS_DIR = "emails"
 VENDAS_EXT = {".csv"}
 EMAILS_EXT = {".txt"}
+
+
+def criar_pasta_exportacao():
+    """Cria a pasta datada da execução atual em Documents/FuelSync."""
+    data_hora = datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss")
+    pasta_exportacao = Path.home() / "Documents" / "FuelSync" / f"marco2025_{data_hora}"
+    pasta_exportacao.mkdir(parents=True, exist_ok=True)
+    return pasta_exportacao
+
+
+def copiar_arquivos_relatorio(arquivos, pasta_exportacao):
+    """Copia arquivos finais para a pasta da execução atual."""
+    pasta_exportacao = Path(pasta_exportacao)
+    pasta_exportacao.mkdir(parents=True, exist_ok=True)
+    for arquivo in arquivos:
+        arquivo = Path(arquivo)
+        shutil.copy2(arquivo, pasta_exportacao / arquivo.name)
 
 
 def separar_partes_email(corpo_email):
@@ -137,6 +156,16 @@ def index():
                 df_vendas, caminho_arquivo_vendas = consolidar_vendas(VENDAS_DIR, precos_referencia)
                 resumos_emails, caminho_arquivo_emails = processar_emails(EMAILS_DIR)
                 ranking_df, caminho_arquivo_ranking = gerar_ranking_faturamento(df_vendas)
+                pasta_exportacao = criar_pasta_exportacao()
+                copiar_arquivos_relatorio(
+                    [
+                        caminho_arquivo_vendas,
+                        caminho_arquivo_emails,
+                        caminho_arquivo_ranking,
+                    ],
+                    pasta_exportacao,
+                )
+                current_app.config["FUELSYNC_EXPORT_DIR"] = str(pasta_exportacao)
 
                 # Os blocos abaixo montam apenas a visao de tela; os CSVs seguem gerados pelos services.
                 total_geral_faturado = df_vendas["valor_total_brl"].sum()
@@ -231,6 +260,7 @@ def index():
                 toast_itens = [
                     f"Vendas consolidadas: {len(df_vendas)} registros",
                     f"E-mails processados: {len(resumos_emails)}",
+                    f"Cópia salva em: {pasta_exportacao}",
                 ]
                 toast_arquivos = [
                     Path(caminho_arquivo_vendas).name,
@@ -261,7 +291,7 @@ def index():
 
 @main.route("/gerar-pdf", methods=["POST"])
 def gerar_pdf():
-    """Gera o PDF sob demanda usando os CSVs ja consolidados."""
+    """Atualiza o PDF e exporta uma copia organizada dos arquivos finais."""
     try:
         output_dir = Path("output")
         vendas_path = output_dir / "vendas_consolidadas_marco2025.csv"
@@ -273,15 +303,15 @@ def gerar_pdf():
         if not (vendas_path.exists() and emails_path.exists() and ranking_path.exists()):
             return {
                 "status": "error",
-                "message": "Processe os arquivos antes de gerar o PDF.",
+                "message": "Não foi possível exportar. Processe os arquivos antes de gerar o PDF.",
             }, 400
 
-        if caminho_pdf.exists():
+        pasta_exportacao = current_app.config.get("FUELSYNC_EXPORT_DIR")
+        if not pasta_exportacao or not Path(pasta_exportacao).exists():
             return {
-                "status": "warning_exists",
-                "message": "Use o arquivo existente ou remova-o para gerar novamente.",
-                "pdf_path": str(caminho_pdf),
-            }, 200
+                "status": "error",
+                "message": "Processe os arquivos antes de gerar o PDF.",
+            }, 400
 
         df_vendas = pd.read_csv(vendas_path)
         resumo_emails_df = pd.read_csv(emails_path)
@@ -289,7 +319,14 @@ def gerar_pdf():
 
         gerar_pdf_relatorio(df_vendas, resumo_emails_df, ranking_df, str(caminho_pdf))
 
-        return {"status": "success", "message": f"PDF gerado com sucesso: {caminho_pdf}", "pdf_path": str(caminho_pdf)}, 200
+        copiar_arquivos_relatorio([caminho_pdf], pasta_exportacao)
+
+        return {
+            "status": "success",
+            "message": "PDF gerado com sucesso.",
+            "pdf_path": str(caminho_pdf),
+            "export_path": str(pasta_exportacao),
+        }, 200
     except Exception as e:
-        return {"status": "error", "message": f"Erro ao gerar PDF: {str(e)}"}, 500
+        return {"status": "error", "message": f"Erro ao exportar relatório: {str(e)}"}, 500
 

@@ -174,7 +174,7 @@
                         </ul>
                         {% endif %}
                         {% else %}
-                        <p>Os resultados serão exibidos aqui após a implementação do processamento de dados.</p>
+                        <p>Processe os arquivos para visualizar o relatório consolidado.</p>
                         {% endif %}
 
                     </div>
@@ -235,7 +235,7 @@
                             </div>
                         </div>
                         {% else %}
-                        <p>O corpo do e-mail será gerado nesta área na próxima etapa.</p>
+                        <p>Após o processamento, o corpo do e-mail será exibido aqui.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -363,7 +363,8 @@
                 const data = await response.json();
 
                 if (response.ok && data.status === 'success') {
-                    mostrarToast('success', '✓ PDF gerado com sucesso', data.pdf_path || data.message);
+                    const mensagem = `PDF atualizado em ${data.pdf_path}\nPDF copiado para ${data.export_path}`;
+                    mostrarToast('success', '✓ PDF gerado com sucesso', mensagem);
                     button.classList.add('success-state');
                     button.textContent = '✓ PDF gerado';
                     setTimeout(() => {
@@ -371,17 +372,13 @@
                         button.classList.remove('success-state');
                         button.textContent = 'Gerar PDF';
                     }, 5000);
-                } else if (response.ok && data.status === 'warning_exists') {
-                    mostrarToast('warning', '⚠ O PDF já existe na pasta output.', data.message);
-                    button.disabled = false;
-                    button.textContent = 'Gerar PDF';
                 } else {
-                    mostrarToast('error', '⚠ Erro ao gerar PDF', data.message);
+                    mostrarToast('error', '⚠ Erro ao exportar relatório', data.message);
                     button.disabled = false;
                     button.textContent = 'Gerar PDF';
                 }
             } catch (error) {
-                mostrarToast('error', '⚠ Erro ao gerar PDF', `Erro ao conectar com o servidor: ${error.message}`);
+                mostrarToast('error', '⚠ Erro ao exportar relatório', `Erro ao conectar com o servidor: ${error.message}`);
                 button.disabled = false;
                 button.textContent = 'Gerar PDF';
             }

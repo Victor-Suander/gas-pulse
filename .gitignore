@@ -14,6 +14,9 @@ __pycache__/
 # Saídas geradas pela aplicação
 output/
 
+# Cache interno da aplicação
+app/cache/
+
 # Arquivos temporários
 *.log
 .DS_Store

@@ -1,1 +1,1 @@
-"""Utility helpers used across the Gas Pulse application."""
+"""Utility helpers used across the FuelSync application."""
