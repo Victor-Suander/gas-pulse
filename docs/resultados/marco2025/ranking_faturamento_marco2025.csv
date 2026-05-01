@@ -1,0 +1,9 @@
+tipo_ranking,posicao,nome,valor_total_brl
+filial,1,Auto Posto Central,204000
+filial,2,Posto Bandeirantes,188000
+filial,3,Posto Litoral Norte,180000
+filial,4,Posto São João,176000
+filial,5,Posto Ipiranga Express,159000
+produto,1,Gasolina Comum,424000
+produto,2,Diesel S10,271000
+produto,3,Etanol,212000
