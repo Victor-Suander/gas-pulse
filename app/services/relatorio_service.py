@@ -1,4 +1,4 @@
-"""Service responsible for generating consolidated reports."""
+"""Geracao de rankings, corpo de email e PDF consolidado."""
 
 import pandas as pd
 from pathlib import Path
@@ -12,7 +12,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 
 
 def gerar_ranking_faturamento(vendas_df):
-    """Gera rankings de faturamento por filial e por produto e salva em CSV."""
+    """Agrupa faturamento por filial/produto e salva o ranking do case."""
     if vendas_df is None or vendas_df.empty:
         raise ValueError("DataFrame de vendas está vazio. Não é possível gerar ranking.")
 
@@ -51,7 +51,7 @@ def gerar_ranking_faturamento(vendas_df):
 
 
 def gerar_pdf_relatorio(vendas_df, resumo_emails_df, ranking_df, caminho_saida):
-    """Gera um PDF adicional com o resumo consolidado do relatório."""
+    """Gera o PDF adicional sem substituir os CSVs obrigatorios."""
     output_path = Path(caminho_saida)
     output_path.parent.mkdir(exist_ok=True)
 
@@ -147,12 +147,11 @@ def gerar_pdf_relatorio(vendas_df, resumo_emails_df, ranking_df, caminho_saida):
     ]:
         elements.append(Paragraph(arquivo, normal_style))
 
-    # Gera o PDF adicional sem substituir os CSVs existentes.
     doc.build(elements)
 
 
 def gerar_corpo_email(vendas_df, resumo_emails_df, caminhos_arquivos):
-    """Monta corpo de email profissional usando os dados de vendas e dos resumos de emails."""
+    """Monta o texto sugerido para envio a sede com os dados consolidados."""
     if vendas_df is None or vendas_df.empty:
         raise ValueError("DataFrame de vendas está vazio. Não é possível gerar corpo do email.")
     if resumo_emails_df is None or resumo_emails_df.empty:

@@ -1,4 +1,4 @@
-"""Utility module for branch definitions and metadata."""
+"""Mapa fixo das filiais usadas no case."""
 
 FILIAIS = {
     "F001": "Posto Bandeirantes",
@@ -10,7 +10,7 @@ FILIAIS = {
 
 
 def obter_nome_filial(filial_id):
-    """Retorna o nome da filial pelo ID ou lança erro se não encontrado."""
+    """Resolve o nome da filial pelo ID extraido do nome do arquivo."""
     if filial_id not in FILIAIS:
         raise ValueError(f"Filial ID '{filial_id}' não encontrado no mapa de filiais.")
     return FILIAIS[filial_id]

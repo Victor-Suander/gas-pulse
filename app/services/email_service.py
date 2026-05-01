@@ -1,4 +1,4 @@
-"""Service responsible for extracting information from manager emails."""
+"""Resumo dos relatos dos gerentes com IA e fallback local."""
 
 import os
 import json
@@ -10,7 +10,7 @@ from app.utils.filiais import obter_nome_filial
 
 
 def extrair_filial_id_email(nome_arquivo):
-    """Extrai o ID da filial do nome do arquivo de email (ex: email_F001_marco2025.txt -> F001)."""
+    """Extrai o ID da filial pelo nome do arquivo, sem delegar essa regra a IA."""
     match = re.search(r'email_(F\d{3})_marco2025\.txt', nome_arquivo)
     if not match:
         raise ValueError(f"Nome de arquivo fora do padrão: '{nome_arquivo}'. Esperado: email_FXXX_marco2025.txt")
@@ -18,7 +18,7 @@ def extrair_filial_id_email(nome_arquivo):
 
 
 def gerar_resumo_com_gemini(texto_email):
-    """Gera resumo estruturado do email usando Gemini API."""
+    """Usa Gemini apenas para resumir texto narrativo em JSON estruturado."""
     load_dotenv()
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
@@ -55,10 +55,9 @@ Relatório:
         )
         resposta_texto = response.text.strip()
 
-        # Tentar parsear como JSON
         resumo_data = json.loads(resposta_texto)
 
-        # Validar estrutura básica
+        # A interface e o CSV dependem destas chaves do JSON.
         required_keys = ["resumo", "destaques", "alertas", "sentimento_geral"]
         for key in required_keys:
             if key not in resumo_data:
@@ -72,7 +71,7 @@ Relatório:
 
 
 def gerar_resumo_fallback(texto_email):
-    """Gera um resumo local simples quando a API Gemini não estiver disponível."""
+    """Aplica heuristicas locais quando a API falha ou retorna resposta invalida."""
     texto = texto_email.lower()
 
     alertas = []
@@ -110,7 +109,6 @@ def gerar_resumo_fallback(texto_email):
     if "diesel" in texto and "destaque" in texto:
         destaques.append("produto Diesel S10 em destaque")
 
-    # Remover duplicatas preservando ordem
     destaques = list(dict.fromkeys(destaques))
 
     score_positivo = sum(texto.count(palavra) for palavra in ["positivo", "crescemos", "excepcional", "melhor março", "aumento", "acima do esperado", "bom movimento"])
@@ -154,7 +152,7 @@ def gerar_resumo_fallback(texto_email):
 
 
 def processar_emails(caminho_pasta_emails):
-    """Processa emails dos gerentes e gera resumo estruturado."""
+    """Processa TXT dos gerentes e salva o CSV de resumo estruturado."""
     pasta = Path(caminho_pasta_emails)
     if not pasta.exists():
         raise FileNotFoundError(f"Pasta de emails não encontrada: {caminho_pasta_emails}")
@@ -185,7 +183,6 @@ def processar_emails(caminho_pasta_emails):
 
         resumos.append(resumo)
 
-    # Salvar CSV
     import pandas as pd
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)
@@ -197,6 +194,6 @@ def processar_emails(caminho_pasta_emails):
 
 
 def carregar_emails(caminho_pasta):
-    """Placeholder to load and parse email content."""
+    """Reservado para leitura isolada de emails em evolucoes futuras."""
     return []
 

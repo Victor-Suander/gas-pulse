@@ -1,4 +1,4 @@
-"""Service responsible for reference price handling and validation."""
+"""Coleta, cache e fallback dos precos de referencia do case."""
 
 import json
 import time
@@ -95,7 +95,7 @@ def carregar_cache_precos_valido(caminho_cache=CACHE_PRECOS_PATH):
 def buscar_precos_referencia(url="https://bridgenoc.github.io/case-postos/precos_marco2025.html"):
     """Coleta preços de referência automaticamente via requisição HTTP.
 
-    Prioridade: web → cache recente → fallback padrão do case.
+    Prioridade: web -> cache recente -> fallback padrao do case.
     Retorna mapa produto → preço médio e a origem usada.
     """
     headers = {

@@ -16,7 +16,7 @@ EMAILS_EXT = {".txt"}
 
 
 def separar_partes_email(corpo_email):
-    """Separa destinatário, assunto e corpo do texto já montado."""
+    """Separa destinatario, assunto e corpo para exibir/copiar na interface."""
     linhas = corpo_email.splitlines()
     destinatario = ""
     assunto = ""
@@ -49,6 +49,7 @@ def formatar_litros(valor):
 
 
 def montar_destaque_ranking(posicao):
+    """Gera destaque curto baseado apenas na posicao do ranking."""
     if posicao == 1:
         return "maior faturamento geral no período."
     if posicao == 2:
@@ -60,10 +61,7 @@ def montar_destaque_ranking(posicao):
 
 @main.route("/", methods=["GET", "POST"])
 def index():
-    """Render the home page and process upload submissions.
-
-    Esta etapa salva os arquivos recebidos em disco sem processar os dados.
-    """
+    """Renderiza a tela principal e executa o fluxo ponta a ponta do case."""
     toast_tipo = None
     toast_titulo = None
     toast_mensagem = None
@@ -125,7 +123,7 @@ def index():
         total_vendas, invalid_vendas = salvar_arquivos_upload(vendas_files, VENDAS_DIR, VENDAS_EXT)
         total_emails, invalid_emails = salvar_arquivos_upload(emails_files, EMAILS_DIR, EMAILS_EXT)
 
-        # Capturar nomes dos arquivos processados para exibir na interface
+        # Guarda os nomes enviados para manter o feedback visivel apos o processamento.
         arquivos_vendas_processados = [f.filename for f in vendas_files if f.filename and extensao_permitida(f.filename, VENDAS_EXT)]
         arquivos_emails_processados = [f.filename for f in emails_files if f.filename and extensao_permitida(f.filename, EMAILS_EXT)]
 
@@ -140,7 +138,7 @@ def index():
                 resumos_emails, caminho_arquivo_emails = processar_emails(EMAILS_DIR)
                 ranking_df, caminho_arquivo_ranking = gerar_ranking_faturamento(df_vendas)
 
-                # Gerar resumo simples de vendas
+                # Os blocos abaixo montam apenas a visao de tela; os CSVs seguem gerados pelos services.
                 total_geral_faturado = df_vendas["valor_total_brl"].sum()
 
                 ranking_produto_tela = []
@@ -179,7 +177,7 @@ def index():
                             "volume_formatado": formatar_litros(volume_por_produto[produto]),
                         })
 
-                # Coletar alertas dos emails
+                # Exibe alertas por filial sem duplicar termos vazios ou NaN vindos do CSV.
                 alertas_por_filial = []
                 for resumo in resumos_emails:
                     alertas_texto = str(resumo.get("alertas") or "").strip()
@@ -263,7 +261,7 @@ def index():
 
 @main.route("/gerar-pdf", methods=["POST"])
 def gerar_pdf():
-    """Rota para gerar PDF sob demanda após o processamento principal."""
+    """Gera o PDF sob demanda usando os CSVs ja consolidados."""
     try:
         output_dir = Path("output")
         vendas_path = output_dir / "vendas_consolidadas_marco2025.csv"
@@ -271,7 +269,7 @@ def gerar_pdf():
         ranking_path = output_dir / "ranking_faturamento_marco2025.csv"
         caminho_pdf = output_dir / "relatorio_consolidado_marco2025.pdf"
 
-        # Validar se os arquivos necessários existem
+        # O PDF depende dos CSVs gerados no processamento principal.
         if not (vendas_path.exists() and emails_path.exists() and ranking_path.exists()):
             return {
                 "status": "error",
@@ -285,12 +283,10 @@ def gerar_pdf():
                 "pdf_path": str(caminho_pdf),
             }, 200
 
-        # Ler os DataFrames dos arquivos já gerados
         df_vendas = pd.read_csv(vendas_path)
         resumo_emails_df = pd.read_csv(emails_path)
         ranking_df = pd.read_csv(ranking_path)
 
-        # Chamar a função que gera o PDF
         gerar_pdf_relatorio(df_vendas, resumo_emails_df, ranking_df, str(caminho_pdf))
 
         return {"status": "success", "message": f"PDF gerado com sucesso: {caminho_pdf}", "pdf_path": str(caminho_pdf)}, 200

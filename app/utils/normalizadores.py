@@ -1,26 +1,26 @@
-"""Utility module for common normalization helpers."""
+"""Normalizacao deterministica de textos e produtos."""
 
 
 def normalizar_texto(texto):
-    """Return a cleaned, lowercase version of the given text."""
+    """Limpa texto para comparacoes simples e previsiveis."""
     if texto is None:
         return ""
     return texto.strip().lower()
 
 
 def normalizar_produto(nome_produto):
-    """Normaliza variações de produtos para nomes canônicos."""
+    """Converte variacoes conhecidas para os tres produtos canonicos do case."""
     produto_lower = normalizar_texto(nome_produto)
 
-    # Mapeamentos para Gasolina Comum
+    # Variacoes aceitas para Gasolina Comum.
     if produto_lower in ["gasolina comum", "gas. comum", "gasolina comun", "gasolina", "gasolina c", "gc"]:
         return "Gasolina Comum"
 
-    # Mapeamentos para Etanol
+    # Variacoes aceitas para Etanol.
     if produto_lower in ["etanol", "etanol hidratado", "etanol hid.", "etanol comum"]:
         return "Etanol"
 
-    # Mapeamentos para Diesel S10
+    # Variacoes aceitas para Diesel S10.
     if produto_lower in ["diesel s10", "diesel s-10", "diesel s10 aditivado", "dsl s10", "s10"]:
         return "Diesel S10"
 
