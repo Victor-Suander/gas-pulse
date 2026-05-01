@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 from google import genai
 from app.utils.filiais import obter_nome_filial
 
+ALERTA_SEM_RELEVANCIA = "Sem alertas relevantes"
+
 
 def extrair_filial_id_email(nome_arquivo):
     """Extrai o ID da filial pelo nome do arquivo, sem delegar essa regra a IA."""
@@ -151,6 +153,23 @@ def gerar_resumo_fallback(texto_email):
     }
 
 
+def formatar_alertas_csv(alertas):
+    """Padroniza alertas vazios para evitar NaN no CSV final."""
+    if not alertas:
+        return ALERTA_SEM_RELEVANCIA
+
+    alertas_validos = [
+        str(alerta).strip()
+        for alerta in alertas
+        if alerta is not None and str(alerta).strip() and str(alerta).strip().lower() != "nan"
+    ]
+
+    if not alertas_validos:
+        return ALERTA_SEM_RELEVANCIA
+
+    return "; ".join(alertas_validos)
+
+
 def processar_emails(caminho_pasta_emails):
     """Processa TXT dos gerentes e salva o CSV de resumo estruturado."""
     pasta = Path(caminho_pasta_emails)
@@ -177,7 +196,7 @@ def processar_emails(caminho_pasta_emails):
             "filial_nome": filial_nome,
             "resumo": resumo_data["resumo"],
             "destaques": "; ".join(resumo_data["destaques"]),
-            "alertas": "; ".join(resumo_data["alertas"]),
+            "alertas": formatar_alertas_csv(resumo_data.get("alertas")),
             "sentimento_geral": resumo_data["sentimento_geral"]
         }
 

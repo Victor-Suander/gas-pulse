@@ -78,6 +78,11 @@ def montar_destaque_ranking(posicao):
     return ""
 
 
+def alerta_sem_relevancia(alerta):
+    """Identifica textos que representam ausencia de alerta operacional."""
+    return alerta.strip().lower() in {"nan", "none", "sem alertas relevantes"}
+
+
 @main.route("/", methods=["GET", "POST"])
 def index():
     """Renderiza a tela principal e executa o fluxo ponta a ponta do case."""
@@ -210,13 +215,13 @@ def index():
                 alertas_por_filial = []
                 for resumo in resumos_emails:
                     alertas_texto = str(resumo.get("alertas") or "").strip()
-                    if not alertas_texto or alertas_texto.lower() == "nan":
+                    if not alertas_texto or alerta_sem_relevancia(alertas_texto):
                         continue
 
                     alertas_unicos = []
                     for alerta in alertas_texto.split("; "):
                         alerta_limpo = alerta.strip()
-                        if alerta_limpo and alerta_limpo.lower() != "nan" and alerta_limpo not in alertas_unicos:
+                        if alerta_limpo and not alerta_sem_relevancia(alerta_limpo) and alerta_limpo not in alertas_unicos:
                             alertas_unicos.append(alerta_limpo)
 
                     for alerta in alertas_unicos:
