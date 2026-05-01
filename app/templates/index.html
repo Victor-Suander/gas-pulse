@@ -3,13 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radar dos Postos</title>
+    <title>FuelSync</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <header class="header">
-        <h1>Radar dos Postos</h1>
-        <p class="subtitle">Transforme arquivos de vendas e relatos dos gerentes em relatórios prontos para decisão.</p>
+        <div class="header-content">
+            <div class="hero-copy">
+                <p class="brand-kicker">Bridge & Co. · Case Técnico</p>
+                <h1>FuelSync</h1>
+                <p class="subtitle">Central de consolidação e análise de vendas para redes de postos.</p>
+                <p class="hero-support">Transforme arquivos de vendas, relatos de gerentes e preços de referência em relatórios prontos para decisão.</p>
+                <div class="hero-chips" aria-label="Recursos do FuelSync">
+                    <span>IA aplicada a e-mails</span>
+                    <span>Relatórios automáticos</span>
+                    <span>Alertas operacionais</span>
+                </div>
+            </div>
+        </div>
     </header>
 
     <main class="main-content">
@@ -111,29 +122,54 @@
                     </div>
                     <div class="result-box">
                         {% if resumo_vendas %}
-                        <p><strong>Total de registros de vendas:</strong> {{ resumo_vendas.total_registros }}</p>
-                        <p><strong>Arquivo de vendas:</strong> {{ resumo_vendas.caminho_arquivo_vendas }}</p>
-                        <p><strong>Arquivo de emails:</strong> {{ resumo_vendas.caminho_arquivo_emails }}</p>
+                        <div class="report-summary">
+                            <p><strong>Total de registros de vendas:</strong> {{ resumo_vendas.total_registros }}</p>
+                            <p><strong>Total geral faturado:</strong> {{ resumo_vendas.total_geral_faturado }}</p>
+                            <p class="file-row">
+                                <strong>Arquivo de vendas:</strong>
+                                <span class="file-link" title="Caminho completo: {{ resumo_vendas.caminho_arquivo_vendas }}" data-tooltip="Caminho completo: {{ resumo_vendas.caminho_arquivo_vendas }}">{{ resumo_vendas.nome_arquivo_vendas }}</span>
+                            </p>
+                            <p class="file-row">
+                                <strong>Arquivo de e-mails:</strong>
+                                <span class="file-link" title="Caminho completo: {{ resumo_vendas.caminho_arquivo_emails }}" data-tooltip="Caminho completo: {{ resumo_vendas.caminho_arquivo_emails }}">{{ resumo_vendas.nome_arquivo_emails }}</span>
+                            </p>
+                            <p class="file-row">
+                                <strong>Arquivo de ranking:</strong>
+                                <span class="file-link" title="Caminho completo: {{ resumo_vendas.caminho_arquivo_ranking }}" data-tooltip="Caminho completo: {{ resumo_vendas.caminho_arquivo_ranking }}">{{ resumo_vendas.nome_arquivo_ranking }}</span>
+                            </p>
+                        </div>
 
-                        <h3>Faturamento por produto</h3>
-                        <ul>
-                        {% for produto, valor in resumo_vendas.faturamento_por_produto.items() %}
-                            <li>{{ produto }}: R$ {{ "%.2f"|format(valor) }}</li>
+                        <h3>Ranking por produto</h3>
+                        <ul class="report-list">
+                        {% for item in resumo_vendas.ranking_produto %}
+                            <li><strong>{{ item.posicao }}º {{ item.nome }}:</strong> {{ item.valor_formatado }}</li>
                         {% endfor %}
                         </ul>
 
-                        <h3>Faturamento por filial</h3>
-                        <ul>
-                        {% for filial, valor in resumo_vendas.faturamento_por_filial.items() %}
-                            <li>{{ filial }}: R$ {{ "%.2f"|format(valor) }}</li>
+                        <h3>Ranking por filial</h3>
+                        <ul class="ranking-list">
+                        {% for item in resumo_vendas.ranking_filial %}
+                            <li>
+                                <strong>{{ item.posicao }}º {{ item.nome }} — {{ item.valor_formatado }}</strong>
+                                {% if item.destaque %}
+                                <span>Destaque: {{ item.destaque }}</span>
+                                {% endif %}
+                            </li>
                         {% endfor %}
                         </ul>
 
-                        {% if resumo_vendas.alertas_emails %}
+                        <h3>Volume total estimado vendido por produto</h3>
+                        <ul class="report-list">
+                        {% for item in resumo_vendas.volume_por_produto %}
+                            <li><strong>{{ item.nome }}:</strong> {{ item.volume_formatado }}</li>
+                        {% endfor %}
+                        </ul>
+
+                        {% if resumo_vendas.alertas_por_filial %}
                         <h3>Alertas dos gerentes</h3>
-                        <ul>
-                        {% for alerta in resumo_vendas.alertas_emails %}
-                            <li>{{ alerta }}</li>
+                        <ul class="report-list">
+                        {% for item in resumo_vendas.alertas_por_filial %}
+                            <li><strong>{{ item.alerta }}</strong> — {{ item.filial_nome }}</li>
                         {% endfor %}
                         </ul>
                         {% endif %}
@@ -299,9 +335,7 @@
         async function copiarTexto(button) {
             const icon = button.querySelector('.copy-icon');
             const iconeOriginal = icon.innerHTML;
-            const content = button.closest('.copy-content');
-            const target = content.querySelector('.email-field, .email-body');
-            const texto = target.innerText;
+            const texto = button.dataset.copyText || button.closest('.copy-content').querySelector('.email-field, .email-body').innerText;
             button.disabled = true;
 
             try {

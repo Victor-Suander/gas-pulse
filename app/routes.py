@@ -38,6 +38,26 @@ def separar_partes_email(corpo_email):
     }
 
 
+def formatar_brl(valor):
+    """Formata número no padrão monetário brasileiro."""
+    return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+def formatar_litros(valor):
+    """Formata volume estimado em litros."""
+    return f"{valor:,.2f} L".replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+def montar_destaque_ranking(posicao):
+    if posicao == 1:
+        return "maior faturamento geral no período."
+    if posicao == 2:
+        return "segunda melhor performance entre as filiais."
+    if posicao == 3:
+        return "presença entre as três melhores filiais do ranking."
+    return ""
+
+
 @main.route("/", methods=["GET", "POST"])
 def index():
     """Render the home page and process upload submissions.
@@ -121,14 +141,62 @@ def index():
                 ranking_df, caminho_arquivo_ranking = gerar_ranking_faturamento(df_vendas)
 
                 # Gerar resumo simples de vendas
-                faturamento_por_produto = df_vendas.groupby("produto_canonico")["valor_total_brl"].sum().to_dict()
-                faturamento_por_filial = df_vendas.groupby("filial_nome")["valor_total_brl"].sum().to_dict()
+                total_geral_faturado = df_vendas["valor_total_brl"].sum()
+
+                ranking_produto_tela = []
+                faturamento_por_produto = (
+                    df_vendas.groupby("produto_canonico")["valor_total_brl"]
+                    .sum()
+                    .sort_values(ascending=False)
+                )
+                for posicao, (produto, valor) in enumerate(faturamento_por_produto.items(), start=1):
+                    ranking_produto_tela.append({
+                        "posicao": posicao,
+                        "nome": produto,
+                        "valor_formatado": formatar_brl(valor),
+                    })
+
+                ranking_filial_tela = []
+                faturamento_por_filial = (
+                    df_vendas.groupby("filial_nome")["valor_total_brl"]
+                    .sum()
+                    .sort_values(ascending=False)
+                )
+                for posicao, (filial, valor) in enumerate(faturamento_por_filial.items(), start=1):
+                    ranking_filial_tela.append({
+                        "posicao": posicao,
+                        "nome": filial,
+                        "valor_formatado": formatar_brl(valor),
+                        "destaque": montar_destaque_ranking(posicao),
+                    })
+
+                volume_por_produto_tela = []
+                volume_por_produto = df_vendas.groupby("produto_canonico")["volume_estimado_litros"].sum()
+                for produto in ["Gasolina Comum", "Etanol", "Diesel S10"]:
+                    if produto in volume_por_produto:
+                        volume_por_produto_tela.append({
+                            "nome": produto,
+                            "volume_formatado": formatar_litros(volume_por_produto[produto]),
+                        })
 
                 # Coletar alertas dos emails
-                alertas_emails = []
+                alertas_por_filial = []
                 for resumo in resumos_emails:
-                    if resumo["alertas"]:
-                        alertas_emails.extend([alerta.strip() for alerta in resumo["alertas"].split("; ") if alerta.strip()])
+                    alertas_texto = str(resumo.get("alertas") or "").strip()
+                    if not alertas_texto or alertas_texto.lower() == "nan":
+                        continue
+
+                    alertas_unicos = []
+                    for alerta in alertas_texto.split("; "):
+                        alerta_limpo = alerta.strip()
+                        if alerta_limpo and alerta_limpo.lower() != "nan" and alerta_limpo not in alertas_unicos:
+                            alertas_unicos.append(alerta_limpo)
+
+                    for alerta in alertas_unicos:
+                        alertas_por_filial.append({
+                            "alerta": alerta,
+                            "filial_nome": resumo["filial_nome"],
+                        })
 
                 resumo_emails_df = pd.DataFrame(resumos_emails)
                 corpo_email = gerar_corpo_email(
@@ -144,14 +212,19 @@ def index():
 
                 resumo_vendas = {
                     "total_registros": len(df_vendas),
+                    "total_geral_faturado": formatar_brl(total_geral_faturado),
                     "caminho_arquivo_vendas": caminho_arquivo_vendas,
                     "caminho_arquivo_emails": caminho_arquivo_emails,
                     "caminho_arquivo_ranking": caminho_arquivo_ranking,
+                    "nome_arquivo_vendas": Path(caminho_arquivo_vendas).name,
+                    "nome_arquivo_emails": Path(caminho_arquivo_emails).name,
+                    "nome_arquivo_ranking": Path(caminho_arquivo_ranking).name,
                     "arquivos_vendas_processados": arquivos_vendas_processados,
                     "arquivos_emails_processados": arquivos_emails_processados,
-                    "faturamento_por_produto": faturamento_por_produto,
-                    "faturamento_por_filial": faturamento_por_filial,
-                    "alertas_emails": alertas_emails,
+                    "ranking_produto": ranking_produto_tela,
+                    "ranking_filial": ranking_filial_tela,
+                    "volume_por_produto": volume_por_produto_tela,
+                    "alertas_por_filial": alertas_por_filial,
                     "corpo_email": corpo_email,
                 }
 
