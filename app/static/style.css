@@ -82,6 +82,12 @@ body {
     border: 1px solid #fecaca;
 }
 
+.toast.warning {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
 .toast-title {
     margin-bottom: 0.25rem;
     font-weight: 700;
@@ -381,13 +387,73 @@ body {
     overflow: hidden;
 }
 
-.result-panel h2 {
+.result-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0;
+    padding: 1.5rem;
+    background: #1e2a44;
+}
+
+.result-panel-header h2 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.result-panel > h2 {
     margin: 0;
     padding: 1.5rem;
     background: #1e2a44;
     color: #ffffff;
     font-size: 1.25rem;
     font-weight: 600;
+}
+
+.pdf-header-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 0.95rem;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 0.55rem;
+    background: #4f7fbf;
+    color: #ffffff;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.pdf-header-button:hover {
+    background: #3b6fa8;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+.pdf-header-button:active {
+    transform: translateY(1px);
+}
+
+.pdf-header-button:disabled {
+    background: #6f94c4;
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+.pdf-header-button.success-state,
+.pdf-header-button.success-state:disabled {
+    background: #16a34a;
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(22, 163, 74, 0.28);
+    cursor: default;
+    opacity: 1;
 }
 
 .result-box {
@@ -429,6 +495,153 @@ body {
     line-height: 1.4;
 }
 
+.email-section {
+    position: relative;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background: #ffffff;
+    margin-bottom: 1rem;
+}
+
+.email-section:last-child {
+    margin-bottom: 0;
+}
+
+.email-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.email-section-header h3 {
+    margin: 0;
+    color: #1e2a44;
+    font-size: 1rem;
+}
+
+.email-field {
+    margin: 0;
+    padding: 0.85rem 3.2rem 0.85rem 1rem;
+    border-radius: 0.6rem;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    overflow-wrap: anywhere;
+}
+
+.copy-content {
+    position: relative;
+}
+
+.copy-content .email-body {
+    padding-right: 3.2rem;
+}
+
+.copy-button {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 1px solid #d1d5db;
+    border-radius: 0.45rem;
+    background: #ffffff;
+    color: #4b5563;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.copy-button::before,
+.copy-button::after {
+    position: absolute;
+    right: 50%;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(50%) translateY(4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.copy-button::before {
+    content: attr(data-tooltip);
+    bottom: calc(100% + 0.55rem);
+    width: max-content;
+    max-width: 180px;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 0.5rem;
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+    color: #374151;
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    z-index: 5;
+}
+
+.copy-button::after {
+    content: "";
+    bottom: calc(100% + 0.25rem);
+    width: 0.55rem;
+    height: 0.55rem;
+    background: #ffffff;
+    border-right: 1px solid rgba(148, 163, 184, 0.28);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.28);
+    box-shadow: 4px 4px 10px rgba(15, 23, 42, 0.06);
+    rotate: 45deg;
+    z-index: 4;
+}
+
+.copy-button:hover::before,
+.copy-button:hover::after,
+.copy-button:focus-visible::before,
+.copy-button:focus-visible::after {
+    opacity: 1;
+    transform: translateX(50%) translateY(0);
+}
+
+.copy-button:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.copy-button:disabled {
+    cursor: default;
+}
+
+.copy-icon,
+.copy-icon svg {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+}
+
+.copy-icon svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.copy-button.copied {
+    background: #dcfce7;
+    border-color: #86efac;
+    color: #166534;
+}
+
+.copy-button.copy-error {
+    background: #fee2e2;
+    border-color: #fecaca;
+    color: #991b1b;
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
     .toast {
@@ -465,5 +678,26 @@ body {
     .secondary-outline-button {
         width: 100%;
         padding: 1rem 1.5rem;
+    }
+
+    .result-panel-header {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 1.25rem;
+    }
+
+    .pdf-header-button {
+        width: 100%;
+        min-height: 2.5rem;
+    }
+
+    .email-section-header {
+        align-items: center;
+        flex-direction: row;
+    }
+
+    .copy-button {
+        width: 2rem;
+        min-width: 2rem;
     }
 }

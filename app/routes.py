@@ -15,6 +15,29 @@ VENDAS_EXT = {".csv"}
 EMAILS_EXT = {".txt"}
 
 
+def separar_partes_email(corpo_email):
+    """Separa destinatário, assunto e corpo do texto já montado."""
+    linhas = corpo_email.splitlines()
+    destinatario = ""
+    assunto = ""
+    indice_inicio_corpo = 0
+
+    for indice, linha in enumerate(linhas):
+        if linha.startswith("Para:"):
+            destinatario = linha.replace("Para:", "", 1).strip()
+        elif linha.startswith("Assunto:"):
+            assunto = linha.replace("Assunto:", "", 1).strip()
+            indice_inicio_corpo = indice + 1
+            break
+
+    corpo = "\n".join(linhas[indice_inicio_corpo:]).strip()
+    return {
+        "destinatario": destinatario,
+        "assunto": assunto,
+        "corpo": corpo,
+    }
+
+
 @main.route("/", methods=["GET", "POST"])
 def index():
     """Render the home page and process upload submissions.
@@ -28,6 +51,7 @@ def index():
     toast_arquivos = []
     toast_aviso = None
     resumo_vendas = None
+    email_partes = None
 
     if request.method == "POST":
         vendas_files = request.files.getlist("vendas_files")
@@ -39,6 +63,7 @@ def index():
             toast_mensagem = "Nenhum arquivo enviado. Envie arquivos CSV de vendas e TXT de emails."
             return render_template(
                 "index.html",
+                email_partes=email_partes,
                 toast_tipo=toast_tipo,
                 toast_titulo=toast_titulo,
                 toast_mensagem=toast_mensagem,
@@ -53,6 +78,7 @@ def index():
             toast_mensagem = "Extensão inválida em arquivos de vendas. Use apenas .csv."
             return render_template(
                 "index.html",
+                email_partes=email_partes,
                 toast_tipo=toast_tipo,
                 toast_titulo=toast_titulo,
                 toast_mensagem=toast_mensagem,
@@ -67,6 +93,7 @@ def index():
             toast_mensagem = "Extensão inválida em arquivos de email. Use apenas .txt."
             return render_template(
                 "index.html",
+                email_partes=email_partes,
                 toast_tipo=toast_tipo,
                 toast_titulo=toast_titulo,
                 toast_mensagem=toast_mensagem,
@@ -113,6 +140,7 @@ def index():
                         "ranking": caminho_arquivo_ranking
                     }
                 )
+                email_partes = separar_partes_email(corpo_email)
 
                 resumo_vendas = {
                     "total_registros": len(df_vendas),
@@ -150,6 +178,7 @@ def index():
     return render_template(
         "index.html",
         resumo_vendas=resumo_vendas,
+        email_partes=email_partes,
         toast_tipo=toast_tipo,
         toast_titulo=toast_titulo,
         toast_mensagem=toast_mensagem,
@@ -167,6 +196,7 @@ def gerar_pdf():
         vendas_path = output_dir / "vendas_consolidadas_marco2025.csv"
         emails_path = output_dir / "resumo_gerentes_marco2025.csv"
         ranking_path = output_dir / "ranking_faturamento_marco2025.csv"
+        caminho_pdf = output_dir / "relatorio_consolidado_marco2025.pdf"
 
         # Validar se os arquivos necessários existem
         if not (vendas_path.exists() and emails_path.exists() and ranking_path.exists()):
@@ -175,16 +205,22 @@ def gerar_pdf():
                 "message": "Processe os arquivos antes de gerar o PDF.",
             }, 400
 
+        if caminho_pdf.exists():
+            return {
+                "status": "warning_exists",
+                "message": "Use o arquivo existente ou remova-o para gerar novamente.",
+                "pdf_path": str(caminho_pdf),
+            }, 200
+
         # Ler os DataFrames dos arquivos já gerados
         df_vendas = pd.read_csv(vendas_path)
         resumo_emails_df = pd.read_csv(emails_path)
         ranking_df = pd.read_csv(ranking_path)
 
         # Chamar a função que gera o PDF
-        caminho_pdf = "output/relatorio_consolidado_marco2025.pdf"
-        gerar_pdf_relatorio(df_vendas, resumo_emails_df, ranking_df, caminho_pdf)
+        gerar_pdf_relatorio(df_vendas, resumo_emails_df, ranking_df, str(caminho_pdf))
 
-        return {"status": "success", "message": f"PDF gerado com sucesso: {caminho_pdf}", "pdf_path": caminho_pdf}, 200
+        return {"status": "success", "message": f"PDF gerado com sucesso: {caminho_pdf}", "pdf_path": str(caminho_pdf)}, 200
     except Exception as e:
         return {"status": "error", "message": f"Erro ao gerar PDF: {str(e)}"}, 500
 

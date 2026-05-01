@@ -101,7 +101,14 @@
         <section class="results-section">
             <div class="results-grid">
                 <div class="result-panel">
-                    <h2>Relatório consolidado</h2>
+                    <div class="result-panel-header">
+                        <h2>Relatório consolidado</h2>
+                        {% if resumo_vendas and resumo_vendas.caminho_arquivo_ranking %}
+                        <button type="button" class="pdf-header-button" onclick="gerarPDF(this)">
+                            <span>Gerar PDF</span>
+                        </button>
+                        {% endif %}
+                    </div>
                     <div class="result-box">
                         {% if resumo_vendas %}
                         <p><strong>Total de registros de vendas:</strong> {{ resumo_vendas.total_registros }}</p>
@@ -133,25 +140,67 @@
                         {% else %}
                         <p>Os resultados serão exibidos aqui após a implementação do processamento de dados.</p>
                         {% endif %}
+
                     </div>
                 </div>
 
                 <div class="result-panel">
                     <h2>Corpo de e-mail gerado</h2>
                     <div class="result-box">
-                        {% if resumo_vendas and resumo_vendas.corpo_email %}
-                        <pre class="email-body">{{ resumo_vendas.corpo_email }}</pre>
+                        {% if email_partes %}
+                        <div class="email-section">
+                            <div class="email-section-header">
+                                <h3>Destinatário</h3>
+                            </div>
+                            <div class="copy-content">
+                                <p class="email-field">{{ email_partes.destinatario }}</p>
+                                <button type="button" class="copy-button" title="Copiar destinatário" aria-label="Copiar destinatário" data-tooltip="Copiar destinatário" onclick="copiarTexto(this)">
+                                    <span class="copy-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" focusable="false">
+                                            <rect x="9" y="9" width="10" height="10" rx="2"></rect>
+                                            <path d="M5 15V7a2 2 0 0 1 2-2h8"></path>
+                                        </svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="email-section">
+                            <div class="email-section-header">
+                                <h3>Assunto</h3>
+                            </div>
+                            <div class="copy-content">
+                                <p class="email-field">{{ email_partes.assunto }}</p>
+                                <button type="button" class="copy-button" title="Copiar assunto" aria-label="Copiar assunto" data-tooltip="Copiar assunto" onclick="copiarTexto(this)">
+                                    <span class="copy-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" focusable="false">
+                                            <rect x="9" y="9" width="10" height="10" rx="2"></rect>
+                                            <path d="M5 15V7a2 2 0 0 1 2-2h8"></path>
+                                        </svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="email-section">
+                            <div class="email-section-header">
+                                <h3>Corpo do e-mail</h3>
+                            </div>
+                            <div class="copy-content">
+                                <pre class="email-body">{{ email_partes.corpo }}</pre>
+                                <button type="button" class="copy-button" title="Copiar corpo do e-mail" aria-label="Copiar corpo do e-mail" data-tooltip="Copiar corpo do e-mail" onclick="copiarTexto(this)">
+                                    <span class="copy-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" focusable="false">
+                                            <rect x="9" y="9" width="10" height="10" rx="2"></rect>
+                                            <path d="M5 15V7a2 2 0 0 1 2-2h8"></path>
+                                        </svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
                         {% else %}
                         <p>O corpo do e-mail será gerado nesta área na próxima etapa.</p>
                         {% endif %}
-
-                        {% if resumo_vendas and resumo_vendas.caminho_arquivo_ranking %}
-                        <div class="pdf-action">
-                            <button type="button" class="secondary-button" onclick="gerarPDF()">Gerar PDF do relatório</button>
-                        </div>
-                        {% endif %}
-
-                        <div id="pdf-message" style="display: none;" class="alert"></div>
                     </div>
                 </div>
             </div>
@@ -181,6 +230,41 @@
             }
         }
 
+        function mostrarToast(tipo, titulo, mensagem) {
+            const toastAtual = document.getElementById('notification-toast');
+            if (toastAtual) {
+                toastAtual.remove();
+            }
+
+            const toast = document.createElement('div');
+            toast.id = 'notification-toast';
+            toast.className = `toast ${tipo}`;
+            toast.setAttribute('role', 'status');
+            toast.setAttribute('aria-live', 'polite');
+
+            const closeButton = document.createElement('button');
+            closeButton.type = 'button';
+            closeButton.className = 'toast-close';
+            closeButton.setAttribute('aria-label', 'Fechar mensagem');
+            closeButton.textContent = 'X';
+            closeButton.addEventListener('click', fecharToast);
+
+            const title = document.createElement('div');
+            title.className = 'toast-title';
+            title.textContent = titulo;
+
+            const message = document.createElement('div');
+            message.className = 'toast-message';
+            message.textContent = mensagem;
+
+            toast.appendChild(closeButton);
+            toast.appendChild(title);
+            toast.appendChild(message);
+            document.querySelector('.main-content').prepend(toast);
+
+            setTimeout(fecharToast, 10000);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             const toast = document.getElementById('notification-toast');
             if (toast) {
@@ -188,34 +272,84 @@
             }
         });
 
-        async function gerarPDF() {
-            const button = event.target;
-            const msgDiv = document.getElementById('pdf-message');
+        async function copiarParaClipboard(texto) {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(texto);
+                return;
+            }
+
+            const textarea = document.createElement('textarea');
+            textarea.value = texto;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'fixed';
+            textarea.style.top = '-9999px';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+
+            const copiado = document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            if (!copiado) {
+                throw new Error('Falha ao copiar texto.');
+            }
+        }
+
+        async function copiarTexto(button) {
+            const icon = button.querySelector('.copy-icon');
+            const iconeOriginal = icon.innerHTML;
+            const content = button.closest('.copy-content');
+            const target = content.querySelector('.email-field, .email-body');
+            const texto = target.innerText;
             button.disabled = true;
-            button.textContent = 'Gerando PDF...';
-            msgDiv.style.display = 'none';
+
+            try {
+                await copiarParaClipboard(texto);
+                button.classList.add('copied');
+                icon.innerHTML = '<svg viewBox="0 0 24 24" focusable="false"><path d="M20 6 9 17l-5-5"></path></svg>';
+            } catch (error) {
+                button.classList.add('copy-error');
+                icon.innerHTML = '<svg viewBox="0 0 24 24" focusable="false"><path d="M12 8v5"></path><path d="M12 17h.01"></path><circle cx="12" cy="12" r="9"></circle></svg>';
+            }
+
+            setTimeout(() => {
+                button.classList.remove('copied', 'copy-error');
+                icon.innerHTML = iconeOriginal;
+                button.disabled = false;
+            }, 10000);
+        }
+
+        async function gerarPDF(button) {
+            button.disabled = true;
+            button.textContent = 'Gerando...';
 
             try {
                 const response = await fetch('/gerar-pdf', { method: 'POST' });
                 const data = await response.json();
 
-                msgDiv.style.display = 'block';
-                if (response.ok) {
-                    msgDiv.className = 'alert success';
-                    msgDiv.textContent = `✓ ${data.message}`;
-                    button.textContent = 'PDF gerado com sucesso!';
-                } else {
-                    msgDiv.className = 'alert error';
-                    msgDiv.textContent = `✗ ${data.message}`;
+                if (response.ok && data.status === 'success') {
+                    mostrarToast('success', '✓ PDF gerado com sucesso', data.pdf_path || data.message);
+                    button.classList.add('success-state');
+                    button.textContent = '✓ PDF gerado';
+                    setTimeout(() => {
+                        button.disabled = false;
+                        button.classList.remove('success-state');
+                        button.textContent = 'Gerar PDF';
+                    }, 5000);
+                } else if (response.ok && data.status === 'warning_exists') {
+                    mostrarToast('warning', '⚠ O PDF já existe na pasta output.', data.message);
                     button.disabled = false;
-                    button.textContent = 'Gerar PDF do relatório';
+                    button.textContent = 'Gerar PDF';
+                } else {
+                    mostrarToast('error', '⚠ Erro ao gerar PDF', data.message);
+                    button.disabled = false;
+                    button.textContent = 'Gerar PDF';
                 }
             } catch (error) {
-                msgDiv.style.display = 'block';
-                msgDiv.className = 'alert error';
-                msgDiv.textContent = `✗ Erro ao conectar com o servidor: ${error.message}`;
+                mostrarToast('error', '⚠ Erro ao gerar PDF', `Erro ao conectar com o servidor: ${error.message}`);
                 button.disabled = false;
-                button.textContent = 'Gerar PDF do relatório';
+                button.textContent = 'Gerar PDF';
             }
         }
 
