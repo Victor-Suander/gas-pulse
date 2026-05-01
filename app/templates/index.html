@@ -13,9 +13,35 @@
     </header>
 
     <main class="main-content">
-        {% if message %}
-        <div class="alert {{ status }}">
-            {{ message }}
+        {% if toast_tipo %}
+        <div id="notification-toast" class="toast {{ toast_tipo }}" role="status" aria-live="polite">
+            <button type="button" class="toast-close" aria-label="Fechar mensagem" onclick="fecharToast()">X</button>
+            <div class="toast-title">{{ toast_titulo }}</div>
+
+            {% if toast_mensagem %}
+            <div class="toast-message">{{ toast_mensagem }}</div>
+            {% endif %}
+
+            {% if toast_itens %}
+            <ul class="toast-list">
+                {% for item in toast_itens %}
+                <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            {% if toast_arquivos %}
+            <div class="toast-section-title">Arquivos gerados:</div>
+            <ul class="toast-file-list">
+                {% for arquivo in toast_arquivos %}
+                <li><span class="toast-check" aria-hidden="true">✓</span>{{ arquivo }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            {% if toast_aviso %}
+            <div class="toast-warning">{{ toast_aviso }}</div>
+            {% endif %}
         </div>
         {% endif %}
 
@@ -29,6 +55,16 @@
                             <input type="file" id="vendas_files" name="vendas_files" accept=".csv" multiple onchange="showSelectedFiles('vendas_files', 'vendas-list')">
                             <span class="field-help">Envie um ou mais arquivos CSV com dados de vendas.</span>
                             <ul id="vendas-list" class="file-list"></ul>
+                            {% if resumo_vendas and resumo_vendas.arquivos_vendas_processados %}
+                            <div class="processed-files">
+                                <span class="processed-label">Arquivos de vendas processados:</span>
+                                <ul class="processed-list">
+                                {% for arquivo in resumo_vendas.arquivos_vendas_processados %}
+                                    <li><span class="processed-check" aria-hidden="true">✓</span>{{ arquivo }}</li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -38,6 +74,16 @@
                             <input type="file" id="emails_files" name="emails_files" accept=".txt" multiple onchange="showSelectedFiles('emails_files', 'emails-list')">
                             <span class="field-help">Envie um ou mais arquivos TXT com emails dos gerentes.</span>
                             <ul id="emails-list" class="file-list"></ul>
+                            {% if resumo_vendas and resumo_vendas.arquivos_emails_processados %}
+                            <div class="processed-files">
+                                <span class="processed-label">E-mails processados:</span>
+                                <ul class="processed-list">
+                                {% for arquivo in resumo_vendas.arquivos_emails_processados %}
+                                    <li><span class="processed-check" aria-hidden="true">✓</span>{{ arquivo }}</li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -126,6 +172,21 @@
                 });
             }
         }
+
+        function fecharToast() {
+            const toast = document.getElementById('notification-toast');
+            if (toast) {
+                toast.classList.add('toast-hidden');
+                setTimeout(() => toast.remove(), 200);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const toast = document.getElementById('notification-toast');
+            if (toast) {
+                setTimeout(fecharToast, 10000);
+            }
+        });
 
         async function gerarPDF() {
             const button = event.target;
