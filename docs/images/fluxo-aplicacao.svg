@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="940" viewBox="0 0 1280 940" role="img" aria-labelledby="title desc">
+  <title id="title">Fluxo da aplicação FuelSync</title>
+  <desc id="desc">Fluxograma do FuelSync desde o upload dos arquivos até a exportação dos resultados finais.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f1f3d"/>
+      <stop offset="55%" stop-color="#174070"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.16"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2 2 L10 6 L2 10 Z" fill="#64748b"/>
+    </marker>
+    <style>
+      .title { font: 800 38px Inter, Sora, Arial, sans-serif; fill: #ffffff; letter-spacing: .3px; }
+      .subtitle { font: 500 17px Inter, Sora, Arial, sans-serif; fill: #dbeafe; }
+      .lane-title { font: 800 15px Inter, Sora, Arial, sans-serif; fill: #1e3a8a; text-transform: uppercase; letter-spacing: .8px; }
+      .box-title { font: 750 17px Inter, Sora, Arial, sans-serif; fill: #0f172a; }
+      .box-text { font: 500 13px Inter, Sora, Arial, sans-serif; fill: #475569; }
+      .small { font: 700 12px Inter, Sora, Arial, sans-serif; fill: #334155; }
+      .lane { fill: #f8fafc; stroke: #dbeafe; stroke-width: 1.5; rx: 24; filter: url(#shadow); }
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; rx: 16; filter: url(#shadow); }
+      .box-blue { fill: #eff6ff; stroke: #93c5fd; }
+      .box-green { fill: #ecfdf5; stroke: #86efac; }
+      .box-amber { fill: #fffbeb; stroke: #fcd34d; }
+      .box-purple { fill: #f5f3ff; stroke: #c4b5fd; }
+      .box-final { fill: #eef2ff; stroke: #818cf8; }
+      .arrow { stroke: #64748b; stroke-width: 2.4; fill: none; marker-end: url(#arrow); }
+      .arrow-soft { stroke: #94a3b8; stroke-width: 2; fill: none; marker-end: url(#arrow); stroke-dasharray: 5 6; }
+      .pill { fill: rgba(255,255,255,.14); stroke: rgba(255,255,255,.3); }
+      .pill-text { font: 700 13px Inter, Sora, Arial, sans-serif; fill: #ffffff; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="940" fill="#eef4ff"/>
+  <rect x="0" y="0" width="1280" height="170" fill="url(#bg)"/>
+  <text x="70" y="72" class="title">FuelSync</text>
+  <text x="70" y="107" class="subtitle">Fluxo principal de processamento, análise e exportação dos resultados</text>
+  <rect x="1030" y="50" width="170" height="34" rx="17" class="pill"/>
+  <text x="1054" y="72" class="pill-text">Bridge &amp; Co. Case</text>
+
+  <rect x="50" y="205" width="1180" height="120" class="lane"/>
+  <text x="78" y="237" class="lane-title">Entrada de arquivos</text>
+  <rect x="95" y="260" width="225" height="46" class="box box-blue"/>
+  <text x="120" y="289" class="box-title">Usuário envia arquivos</text>
+  <rect x="405" y="250" width="210" height="62" class="box"/>
+  <text x="430" y="277" class="box-title">Upload de CSVs</text>
+  <text x="430" y="297" class="box-text">vendas por filial</text>
+  <rect x="710" y="250" width="210" height="62" class="box"/>
+  <text x="735" y="277" class="box-title">Upload de TXTs</text>
+  <text x="735" y="297" class="box-text">relatos dos gerentes</text>
+  <path d="M320 283 H405" class="arrow"/>
+  <path d="M615 281 H710" class="arrow"/>
+
+  <rect x="50" y="360" width="1180" height="165" class="lane"/>
+  <text x="78" y="392" class="lane-title">Tratamento de preços</text>
+  <rect x="95" y="422" width="245" height="62" class="box box-blue"/>
+  <text x="120" y="449" class="box-title">Coleta da URL oficial</text>
+  <text x="120" y="469" class="box-text">requests, timeout e retry</text>
+  <rect x="425" y="422" width="220" height="62" class="box box-amber"/>
+  <text x="450" y="449" class="box-title">Se URL falhar</text>
+  <text x="450" y="469" class="box-text">usa cache recente</text>
+  <rect x="730" y="422" width="230" height="62" class="box box-amber"/>
+  <text x="755" y="449" class="box-title">Se cache falhar</text>
+  <text x="755" y="469" class="box-text">usa fallback padrão</text>
+  <rect x="1030" y="422" width="145" height="62" class="box box-green"/>
+  <text x="1053" y="449" class="box-title">Preços</text>
+  <text x="1053" y="469" class="box-text">definidos</text>
+  <path d="M340 453 H425" class="arrow"/>
+  <path d="M645 453 H730" class="arrow-soft"/>
+  <path d="M960 453 H1030" class="arrow"/>
+
+  <rect x="50" y="560" width="560" height="220" class="lane"/>
+  <text x="78" y="592" class="lane-title">Processamento de vendas</text>
+  <rect x="95" y="625" width="210" height="58" class="box"/>
+  <text x="118" y="650" class="box-title">Normalização</text>
+  <text x="118" y="670" class="box-text">produtos canônicos</text>
+  <rect x="355" y="625" width="205" height="58" class="box"/>
+  <text x="378" y="650" class="box-title">Filiais</text>
+  <text x="378" y="670" class="box-text">F001 a F005</text>
+  <rect x="95" y="710" width="210" height="58" class="box box-green"/>
+  <text x="118" y="735" class="box-title">Consolidação</text>
+  <text x="118" y="755" class="box-text">vendas em CSV</text>
+  <rect x="355" y="710" width="205" height="58" class="box box-green"/>
+  <text x="378" y="735" class="box-title">Volume estimado</text>
+  <text x="378" y="755" class="box-text">valor / preço médio</text>
+  <path d="M305 654 H355" class="arrow"/>
+  <path d="M200 683 V710" class="arrow"/>
+  <path d="M305 739 H355" class="arrow"/>
+
+  <rect x="670" y="560" width="560" height="220" class="lane"/>
+  <text x="698" y="592" class="lane-title">Processamento dos e-mails</text>
+  <rect x="715" y="625" width="220" height="58" class="box box-purple"/>
+  <text x="738" y="650" class="box-title">Gemini API</text>
+  <text x="738" y="670" class="box-text">resumo, alertas e sentimento</text>
+  <rect x="980" y="625" width="200" height="58" class="box box-amber"/>
+  <text x="1003" y="650" class="box-title">Se IA falhar</text>
+  <text x="1003" y="670" class="box-text">fallback local</text>
+  <rect x="850" y="710" width="220" height="58" class="box box-green"/>
+  <text x="873" y="735" class="box-title">Resumo estruturado</text>
+  <text x="873" y="755" class="box-text">CSV dos gerentes</text>
+  <path d="M935 654 H980" class="arrow-soft"/>
+  <path d="M825 683 C825 705 885 698 912 710" class="arrow"/>
+  <path d="M1080 683 C1080 705 1018 698 1000 710" class="arrow"/>
+
+  <rect x="50" y="815" width="1180" height="90" class="lane"/>
+  <text x="78" y="847" class="lane-title">Saídas finais</text>
+  <rect x="120" y="862" width="190" height="34" class="box box-final"/>
+  <text x="143" y="884" class="small">Ranking gerado</text>
+  <rect x="360" y="862" width="220" height="34" class="box box-final"/>
+  <text x="383" y="884" class="small">Relatório consolidado</text>
+  <rect x="630" y="862" width="210" height="34" class="box box-final"/>
+  <text x="653" y="884" class="small">Corpo de e-mail</text>
+  <rect x="890" y="862" width="150" height="34" class="box box-final"/>
+  <text x="913" y="884" class="small">PDF sob demanda</text>
+  <rect x="1075" y="862" width="115" height="34" class="box box-final"/>
+  <text x="1094" y="884" class="small">Exportação</text>
+
+  <path d="M458 768 C458 805 215 812 215 862" class="arrow"/>
+  <path d="M960 768 C960 807 735 812 735 862" class="arrow"/>
+  <path d="M310 879 H360" class="arrow"/>
+  <path d="M580 879 H630" class="arrow"/>
+  <path d="M840 879 H890" class="arrow"/>
+  <path d="M1040 879 H1075" class="arrow"/>
+</svg>

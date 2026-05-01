@@ -40,6 +40,10 @@ A solução automatiza uma rotina de análise da sede de uma rede fictícia de p
 
 ## Fluxo da aplicação
 
+O diagrama abaixo resume o fluxo principal do FuelSync, desde o envio dos arquivos até a geração dos resultados finais.
+
+![Fluxo da aplicação do FuelSync](docs/images/fluxo-aplicacao.svg)
+
 1. O usuário envia CSVs de vendas e TXTs de e-mails pela interface web.
 2. A aplicação salva os arquivos enviados nas pastas de entrada.
 3. As filiais são identificadas pelo padrão dos nomes dos arquivos.
