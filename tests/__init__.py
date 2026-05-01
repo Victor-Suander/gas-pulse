@@ -1,1 +1,1 @@
-"""Test package for Gas Pulse.""
+"""Test package for FuelSync."""
