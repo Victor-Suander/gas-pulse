@@ -1,6 +1,5 @@
 """Processamento deterministico dos CSVs de vendas dos postos."""
 
-import os
 import re
 import pandas as pd
 from pathlib import Path
@@ -71,8 +70,4 @@ def consolidar_vendas(caminho_pasta_vendas, precos_referencia):
 
     return df_consolidado, str(caminho_saida)
 
-
-def carregar_vendas(caminho_csv):
-    """Reservado para leitura isolada de vendas em evolucoes futuras."""
-    return []
 

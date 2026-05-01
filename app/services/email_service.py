@@ -193,7 +193,3 @@ def processar_emails(caminho_pasta_emails):
     return resumos, str(caminho_saida)
 
 
-def carregar_emails(caminho_pasta):
-    """Reservado para leitura isolada de emails em evolucoes futuras."""
-    return []
-

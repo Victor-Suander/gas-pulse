@@ -141,7 +141,3 @@ def buscar_precos_referencia(url="https://bridgenoc.github.io/case-postos/precos
     print(f"Falha ao acessar/processar URL de preços. Usando fallback do case: {ultimo_erro}")
     return PRECOS_REFERENCIA_FALLBACK.copy(), "fallback"
 
-
-def carregar_precos_referencia(caminho_arquivo):
-    """Placeholder to load reference prices."""
-    return {}
