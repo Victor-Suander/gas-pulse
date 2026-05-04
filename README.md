@@ -22,7 +22,7 @@ A solução automatiza uma rotina de análise da sede de uma rede fictícia de p
 - Uso da Gemini API apenas para resumir textos narrativos dos gerentes.
 - Fallback local para resumo de e-mails quando a IA falha ou atinge limite de cota.
 - Geração de ranking por filial e por produto.
-- Geração de corpo de e-mail sugerido para envio à sede.
+- Geração de corpo de e-mail sugerido para envio à sede, com valores no padrão brasileiro e rankings quebrados por linha.
 - Geração de PDF sob demanda.
 - Exportação local dos arquivos finais em pasta datada.
 
@@ -197,6 +197,12 @@ Ao clicar em `Gerar PDF`:
 
 ## Exemplos versionados
 
+A pasta abaixo contém os arquivos de entrada do case, reunindo CSVs de vendas e TXTs de e-mails dos gerentes:
+
+```text
+emails-vendas/
+```
+
 A pasta abaixo contém exemplos finais versionados no GitHub:
 
 ```text
@@ -260,6 +266,7 @@ Visão geral da aplicação após o processamento completo dos arquivos.
 - `app/cache/` - cache interno de preços, ignorado pelo Git.
 - `app/templates/` - templates HTML.
 - `app/static/` - estilos CSS.
+- `emails-vendas/` - arquivos de exemplo do case para entrada, com vendas e e-mails.
 - `vendas/` - arquivos CSV de entrada.
 - `emails/` - arquivos TXT de entrada.
 - `output/` - arquivos gerados localmente, ignorados pelo Git.
