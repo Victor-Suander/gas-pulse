@@ -11,6 +11,11 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 
 
+def formatar_brl(valor):
+    """Formata valores monetarios no padrao brasileiro."""
+    return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+
 def gerar_ranking_faturamento(vendas_df):
     """Agrupa faturamento por filial/produto e salva o ranking do case."""
     if vendas_df is None or vendas_df.empty:
@@ -167,11 +172,11 @@ def gerar_corpo_email(vendas_df, resumo_emails_df, caminhos_arquivos):
     else:
         alertas_texto = "; ".join(alertas)
 
-    top_filiais = ", ".join(
-        [f"{nome} (R$ {valor:.2f})" for nome, valor in total_filiais.head(3).items()]
+    top_filiais = "\n".join(
+        [f"  - {nome}: {formatar_brl(valor)}" for nome, valor in total_filiais.head(3).items()]
     )
-    top_produtos = ", ".join(
-        [f"{nome} (R$ {valor:.2f})" for nome, valor in total_produtos.head(3).items()]
+    top_produtos = "\n".join(
+        [f"  - {nome}: {formatar_brl(valor)}" for nome, valor in total_produtos.head(3).items()]
     )
 
     corpo = [
@@ -187,7 +192,7 @@ def gerar_corpo_email(vendas_df, resumo_emails_df, caminhos_arquivos):
         f"- Resumo de gerentes: {caminhos_arquivos.get('emails')}",
         f"- Ranking de faturamento: {caminhos_arquivos.get('ranking')}",
         "",
-        f"Total geral faturado: R$ {total_geral:.2f}",
+        f"Total geral faturado: {formatar_brl(total_geral)}",
         "",
         "Ranking por filial:",
         f"{top_filiais}",

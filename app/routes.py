@@ -25,6 +25,16 @@ def criar_pasta_exportacao():
     return pasta_exportacao
 
 
+def limpar_pasta_uploads(pasta, extensoes):
+    """Remove arquivos com as extensões informadas para que apenas o upload atual seja processado."""
+    pasta_path = Path(pasta)
+    if not pasta_path.exists():
+        return
+    for arquivo in pasta_path.iterdir():
+        if arquivo.is_file() and arquivo.suffix.lower() in extensoes:
+            arquivo.unlink()
+
+
 def copiar_arquivos_relatorio(arquivos, pasta_exportacao):
     """Copia arquivos finais para a pasta da execução atual."""
     pasta_exportacao = Path(pasta_exportacao)
@@ -144,6 +154,8 @@ def index():
                 toast_aviso=toast_aviso,
             )
 
+        limpar_pasta_uploads(VENDAS_DIR, VENDAS_EXT)
+        limpar_pasta_uploads(EMAILS_DIR, EMAILS_EXT)
         total_vendas, invalid_vendas = salvar_arquivos_upload(vendas_files, VENDAS_DIR, VENDAS_EXT)
         total_emails, invalid_emails = salvar_arquivos_upload(emails_files, EMAILS_DIR, EMAILS_EXT)
 
@@ -334,4 +346,3 @@ def gerar_pdf():
         }, 200
     except Exception as e:
         return {"status": "error", "message": f"Erro ao exportar relatório: {str(e)}"}, 500
-
